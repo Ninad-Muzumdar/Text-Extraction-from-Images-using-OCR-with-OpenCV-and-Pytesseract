@@ -7,8 +7,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
-    <script src="FileSaver.js"></script>
-    <script src="jquery.wordexport.js"></script>
 </head>
 
 <body>
@@ -30,7 +28,7 @@
                             <div class="ocr_upload_block col-md-4">
                                 <form class="ocr_form row p-4" method="POST">
                                     <div class="col-md-12">
-                                        <input class="filename" type="file" id="filename" name="filename" dowmload>
+                                        <input class="filename" type="file" id="filename" name="filename">
                                         <p>Drag your files here or click in this area.</p>
                                     </div>
                                     <div class="col-md-12">
@@ -38,10 +36,7 @@
                                     </div>
                                 </form>
                             </div>
-                            <div class="ocr_doc_view col-md-7 p-3">
-                                <div class="ocr_view_block"></div>
-                                <a class="word-export" href="javascript:void(0)"> Export as .doc </a>
-                            </div>
+                            <div class="ocr_doc_view col-md-7 p-3"></div>
                         </div>
                     </div>
                 </div>
@@ -72,10 +67,6 @@
                 $('.ocr_form .filename').change(function () {
                     $('.ocr_form p').text(this.files.length + " file(s) selected");
                 });
-
-                $("a.word-export").click(function (event) {
-                    $("#page-content").wordExport();
-                });
             });
 
             $(document).on('submit', '.ocr_form', function (e) {
@@ -96,7 +87,7 @@
                             filename: filename
                         },
                         success: function (response) {
-                            $(".ocr_view_block").text(response);
+                            $(".ocr_doc_view").text(response);
                             $(".overlay").hide();
                         }
                     })
