@@ -1,0 +1,532 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+    <script src="FileSaver.js"></script>
+    <script src="jquery.wordexport.js"></script>
+</head>
+
+<body>
+    <nav class="ocr_navbar">
+        <a class="ocr_head" href="#purch_order">OCR Application</a>
+    </nav>
+    <div class="tab-content" id="tab_content">
+        <div class="overlay">
+            <div class="overlay__inner">
+                <div class="overlay__content"><span class="spinner"></span></div>
+            </div>
+        </div>
+        <div class="tab-pane fade show active" id="purch_order">
+            <img src="{{ bg_img }}" class="content_bg">
+            <div class="purch_ord_back container pt-4">
+                <div class="tab-content">
+                    <div id="create_po" class="tab-pane fade show active">
+                        <div class="ocr_container row">
+                            <div class="ocr_upload_block col-md-4">
+                                <form class="ocr_form row p-4" method="POST">
+                                    <div class="col-md-12">
+                                        <input class="filename" type="file" id="filename" name="filename" dowmload>
+                                        <p>Drag your files here or click in this area.</p>
+                                    </div>
+                                    <div class="col-md-12">
+                                        <input type="submit" value="Upload" class="doc_upload_submit css_submit_button">
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="ocr_doc_view col-md-7 p-3">
+                                <div class="ocr_view_block"></div>
+                                <a class="word-export" href="javascript:void(0)"> Export as .doc </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal content -->
+            <div id="myModal" class="modal fade" tabindex="-1">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Message</h5>
+                            <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body">
+                            <p class="modal_msg"></p>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Ok</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            $(document).ready(function () {
+                $(".overlay").hide();
+                $('.ocr_form .filename').change(function () {
+                    $('.ocr_form p').text(this.files.length + " file(s) selected");
+                });
+
+                $("a.word-export").click(function (event) {
+                    $("#page-content").wordExport();
+                });
+            });
+
+            $(document).on('submit', '.ocr_form', function (e) {
+                if ($(".filename")[0].files[0] == undefined) {
+                    // $("#myModal").modal('show');
+                    // $(".modal_msg").text("Something went wrong...");
+                    alert("Something went wrong...");
+                    return false;
+                } else {
+                    $(".overlay").show();
+                    var filename = $(".filename")[0].files[0].name;
+
+                    e.preventDefault();
+                    $.ajax({
+                        type: 'POST',
+                        url: '/color_ocr',
+                        data: {
+                            filename: filename
+                        },
+                        success: function (response) {
+                            $(".ocr_view_block").text(response);
+                            $(".overlay").hide();
+                        }
+                    })
+                }
+            });
+
+
+        </script>
+</body>
+
+<head>
+    <style>
+        body {
+            overflow: hidden;
+        }
+
+        .ocr_navbar {
+            background-color: #1769a1;
+            color: #fff;
+            text-align: center;
+        }
+
+        .ocr_head {
+            color: #fff;
+            font-size: 30px;
+            font-weight: 500;
+        }
+
+        .nav_options {
+            float: right;
+        }
+
+        .nav_option_tab {
+            color: #fff;
+        }
+
+        .dash_container {
+            /* box-shadow: 0px 0px 5px 3px #efefef; */
+            background-color: #e8e8e8;
+            /* width: 99%; */
+            /* margin-left: 19px; */
+        }
+
+        .graph_box {
+            text-align: center;
+            box-shadow: 0px 0px 7px 4px #cbcbcb;
+        }
+
+        .graph_title {
+            color: #dbdbdb;
+            font-weight: 500;
+        }
+
+        #purch_order_count {
+            background-color: #ed143dfa;
+        }
+
+        .purch_order_val {
+            color: #fff;
+            font-size: 50px;
+        }
+
+        #on_time_del_rate {
+            background-color: cadetblue;
+        }
+
+        .on_time_del_rate_val {
+            color: #fff;
+            font-size: 50px;
+        }
+
+        #in_transit_goods_count {
+            background-color: #fc8803;
+        }
+
+        .in_transit_goods_count_val {
+            color: #fff;
+            font-size: 50px;
+        }
+
+        .ocr_main_img {
+            width: -webkit-fill-available;
+            height: 200px;
+        }
+
+        .opaque_container {
+            position: absolute;
+            width: -webkit-fill-available;
+            height: 200px;
+            background-color: black;
+            opacity: 30%;
+        }
+
+        .ocr_dashboard {
+            background-color: #fff;
+            box-shadow: 0px 0px 5px 5px #b4b4b4;
+        }
+
+        #purch_order {
+            background-color: #e8e8e8;
+            height: 92%;
+        }
+
+        .purch_ord_back {
+            z-index: 1;
+            position: absolute;
+            margin-left: 65px;
+            margin-top: 13px;
+        }
+
+        .purch_ord_back li {
+            padding: 7px;
+            background-color: #fff;
+            font-weight: 500;
+        }
+
+        .purch_ord_back li .active {
+            border-style: solid;
+            border: 5px solid;
+            border-right-color: transparent;
+            border-left-color: transparent;
+            border-bottom-color: transparent;
+            /* border-top-color: #12909a; */
+            background-color: #fff;
+            color: #12909a !important;
+            /* border-radius: 6px; */
+            /* padding: 7px; */
+            font-weight: 500;
+        }
+
+        #create_po,
+        #view_po,
+        #retrieve_blocks {
+            box-shadow: 0px 0px 5px 5px #b4b4b4;
+            min-height: 100px;
+            height: 490px;
+            padding: 1px;
+            background-color: #1769a1;
+            opacity: 85%;
+        }
+
+        #create_po_text,
+        #view_po_text,
+        #retrieve_blocks_text {
+            color: #626262 !important;
+        }
+
+        .purch_ord_back #create_po_text.active,
+        .purch_ord_back #view_po_text.active,
+        .purch_ord_back #retrieve_blocks_text.active {
+            color: #12909a !important;
+        }
+
+        table {
+            font-family: arial, sans-serif;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        td,
+        th {
+            border: 1px solid #dddddd;
+            text-align: left;
+            padding: 8px;
+        }
+
+        tr:nth-child(even) {
+            background-color: #dddddd;
+        }
+
+        .blc_block {
+            box-shadow: 0px 0px 5px 3px #bfbfbf;
+            width: fit-content;
+            height: fit-content;
+        }
+
+        .blc_block_1 {
+            box-shadow: 0px 0px 5px 3px #bfbfbf;
+            width: fit-content;
+            height: fit-content;
+        }
+
+        .block_div {
+            border-bottom: 1px solid;
+            font-size: 13px;
+            word-break: break-all;
+        }
+
+        .block_topic_fnt_size {
+            font-weight: 700;
+        }
+
+        .po_form_submit {
+            background-color: #12909a;
+            border: none;
+            color: #fff;
+            padding: 10px 30px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            -webkit-transition-duration: 0.4s;
+            transition-duration: 0.4s;
+            margin-left: auto;
+            margin-right: 53px;
+            margin-top: 20px;
+        }
+
+        .css_submit_button {
+            box-shadow: 0 18px 16px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0, 0.19);
+        }
+
+        .po_form_submit:hover {
+            background-color: #0b5257;
+        }
+
+        .blc_block {
+            width: 250px;
+            flex-shrink: 0;
+        }
+
+        .blc_block_1 {
+            /* width: 250px;
+            flex-shrink: 0; */
+        }
+
+        .validate_blockchain {
+            background-color: #fff;
+            color: black;
+            font-weight: 700;
+            border: 2px solid #4CAF50;
+            border-radius: 15px;
+            height: 50px;
+            width: 110px;
+            float: right;
+        }
+
+        .connect_nodes_blockchain {
+            background-color: #fff;
+            color: black;
+            font-weight: 700;
+            border: 2px solid #008CBA;
+            border-radius: 15px;
+            height: 50px;
+            width: 140px;
+            float: right;
+        }
+
+        .replace_chain {
+            background-color: #fff;
+            color: black;
+            font-weight: 700;
+            border: 2px solid #f44336;
+            border-radius: 15px;
+            height: 50px;
+            width: 145px;
+            float: right;
+        }
+
+        .validate_blockchain:hover {
+            background-color: #4CAF50;
+        }
+
+        .connect_nodes_blockchain:hover {
+            background-color: #008CBA;
+        }
+
+        .replace_chain:hover {
+            background-color: #f44336;
+        }
+
+        .search_bar {
+            border-radius: 20px;
+            width: 300px;
+            height: 35px;
+            margin-left: 400px;
+            margin-top: 40px;
+            padding: 18px;
+        }
+
+        .search_button {
+            /* border-color: #c7c7c7; */
+            background-color: #cca31c;
+            border: none;
+            color: #fff;
+            padding: 10px 30px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            -webkit-transition-duration: 0.4s;
+            transition-duration: 0.4s;
+            margin-left: auto;
+            margin-right: 53px;
+            margin-top: 20px;
+        }
+
+        .search_button:hover {
+            background-color: #5f4a04;
+        }
+
+        .ocr_form {
+            border: 1px solid;
+            margin: 30px;
+            width: 300px;
+        }
+
+        .content_bg {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+        }
+
+        .ocr_doc_view {
+            background-color: #fff;
+            margin-left: 80px;
+            height: 100%;
+            overflow-y: auto;
+        }
+
+        .ocr_container {
+            height: 100%;
+        }
+
+        .ocr_form {
+            position: absolute;
+            top: 10%;
+            width: 380px;
+            height: 200px;
+            border: 4px dashed #fff;
+        }
+
+        .ocr_form p {
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            line-height: 170px;
+            color: #ffffff;
+            font-family: Arial;
+        }
+
+        .ocr_form .filename {
+            position: absolute;
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            outline: none;
+            opacity: 0;
+        }
+
+        .ocr_form .css_submit_button {
+            color: #fff;
+            background: #16a085;
+            border: none;
+            width: 380px;
+            height: 35px;
+            margin-top: 35px;
+            margin-left: -43px;
+            border-radius: 4px;
+            border-bottom: 4px solid #117A60;
+            transition: all .2s ease;
+            outline: none;
+        }
+
+        .ocr_form .css_submit_button:hover {
+            background: #149174;
+            color: #0C5645;
+        }
+
+        .ocr_form .css_submit_button:active {
+            border: 0;
+        }
+
+        .disabled_button {
+            background-color: #626262;
+        }
+
+        .overlay {
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            position: fixed;
+            background: #222;
+            z-index: 100;
+            opacity: 40%;
+            /* display: none; */
+        }
+
+        .overlay__inner {
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+        }
+
+        .overlay__content {
+            left: 50%;
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .spinner {
+            width: 120px;
+            height: 120px;
+            display: inline-block;
+            border-width: 10px;
+            border-color: rgb(34 199 6 / 5%);
+            border-top-color: #ff0606;
+            border-left-color: #ff0606;
+            border-bottom-color: #fff;
+            border-right-color: #fff;
+            animation: spin 1s infinite linear;
+            border-radius: 100%;
+            border-style: solid;
+        }
+
+        @keyframes spin {
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+
+</html>
